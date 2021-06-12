@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.PremierLeague.model.Adiacenza;
+import it.polito.tdp.PremierLeague.model.GiocatoreTitolarita;
 import it.polito.tdp.PremierLeague.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -66,7 +67,30 @@ public class FXMLController {
 
     @FXML
     void doDreamTeam(ActionEvent event) {
-
+    	this.txtResult.clear();
+    	
+    	if(this.model.getGrafo() == null) {
+    		this.txtResult.appendText("Creare prima il grafo!");
+    		return;
+    	}
+    	String kS = this.txtK.getText();
+    	try {
+    		int k = Integer.parseInt(kS);
+    		if(k < 0) {
+    			this.txtResult.appendText("Inserire un numero maggiore di zero!");
+        		return;
+    		}
+    		List<GiocatoreTitolarita> dreamTeam = this.model.getDreamTeam(k);
+    		this.txtResult.appendText("DREAM TEAM:\n");
+    		for(GiocatoreTitolarita g : dreamTeam) {
+    			this.txtResult.appendText(g.getP() + "\n");
+    		}
+    		this.txtResult.appendText("\nGRADO DI TITOLARITA' TOTALE: " + this.model.getGradoTitolarita());
+    	}
+    	catch(NumberFormatException nfe) {
+    		this.txtResult.appendText("Inserire un numero!");
+    		return;
+    	}
     }
 
     @FXML

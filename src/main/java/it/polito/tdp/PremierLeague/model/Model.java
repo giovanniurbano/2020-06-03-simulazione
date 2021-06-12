@@ -20,6 +20,9 @@ public class Model {
 	private Graph<Player, DefaultWeightedEdge> grafo;
 	private Player top;
 	
+	private List<GiocatoreTitolarita> dreamTeam;
+	private int gradoTitolarita;
+	
 	public Model() {
 		this.dao = new PremierLeagueDAO();
 	}
@@ -90,12 +93,89 @@ public class Model {
 		return result;
 	}
 
+	public List<Player> getBattuti(Player p) {
+		List<Player> result =  new ArrayList<>();
+		for(DefaultWeightedEdge e : this.grafo.outgoingEdgesOf(p)) {
+			result.add(Graphs.getOppositeVertex(this.grafo, e, p));
+		}
+		
+		return result;
+	}
+	
 	public Player getTop() {
 		return this.top;
 	}
 
 	public Graph<Player, DefaultWeightedEdge> getGrafo() {
 		return grafo;
+	}
+	
+	public List<GiocatoreTitolarita> getDreamTeam(int k) {
+		this.dreamTeam = null;
+		this.gradoTitolarita = 0;
+		
+		List<GiocatoreTitolarita> parziale = new ArrayList<GiocatoreTitolarita>();
+		List<Player> esclusi = new ArrayList<Player>();
+		
+		this.cerca(parziale, k, 0, esclusi);
+		
+		return this.dreamTeam;
+	}
+
+	private void cerca(List<GiocatoreTitolarita> parziale, int k, int L, List<Player> esclusi) {
+		//casi terminali
+		if(parziale.size() == k) {
+			//ho completato il dream team
+			int gt = 0;
+			for(GiocatoreTitolarita p : parziale)
+				gt += p.getGradoTitolarita();
+			
+			if(gt > this.gradoTitolarita) {
+				this.dreamTeam = new ArrayList<GiocatoreTitolarita>(parziale);
+				this.gradoTitolarita = gt;
+			}
+			return;
+		}
+		
+		if(L == this.grafo.vertexSet().size()) {
+			//ho finito i giocatori
+			return;
+		}
+		
+		for(Player p : this.grafo.vertexSet()) {
+			GiocatoreTitolarita candidato = new GiocatoreTitolarita(p, this.getGradoTitolarita(p));
+			if( (parziale.isEmpty() || !esclusi.contains(p) ) && !parziale.contains(candidato)) {
+				parziale.add(candidato);
+				esclusi.addAll(this.getBattuti(p));
+				
+				this.cerca(parziale, k, L+1, esclusi);
+				
+				//backtracking
+				parziale.remove(parziale.get(parziale.size()-1));
+				esclusi.removeAll(this.getBattuti(p));
+			}
+	
+		}
+		
+	}
+	
+	private int getGradoTitolarita(Player p) {
+		int grado = 0;
+		double pesoUscente = 0.0;
+		for(DefaultWeightedEdge out : this.grafo.outgoingEdgesOf(p))
+			pesoUscente += this.grafo.getEdgeWeight(out);
+		
+		double pesoEntrante = 0.0;
+		for(DefaultWeightedEdge in : this.grafo.incomingEdgesOf(p))
+			pesoEntrante += this.grafo.getEdgeWeight(in);
+		
+		grado = (int) (pesoUscente - pesoEntrante);
+		
+		return grado;
+	}
+
+	public int getGradoTitolarita() {
+		return gradoTitolarita;
 	}
 	
 }
