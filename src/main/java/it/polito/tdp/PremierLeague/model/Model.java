@@ -1,6 +1,7 @@
 package it.polito.tdp.PremierLeague.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class Model {
 	private List<Player> vertici;
 	private Map<Integer, Player> idMap;
 	private Graph<Player, DefaultWeightedEdge> grafo;
+	private Player top;
 	
 	public Model() {
 		this.dao = new PremierLeagueDAO();
@@ -65,4 +67,35 @@ public class Model {
 			}
 		}
 	}
+	
+	public List<Adiacenza> getTopPlayerList() {
+		this.top = null;
+		Player best = null;
+		int max = 0;
+		for(Player p : this.grafo.vertexSet()) {
+			if(this.grafo.outDegreeOf(p) > max) {
+				max = this.grafo.outDegreeOf(p);
+				best = p;
+			}
+		}
+		
+		this.top = best;
+		
+		List<Adiacenza> result =  new ArrayList<>();
+		for(DefaultWeightedEdge e : this.grafo.outgoingEdgesOf(top)) {
+			result.add(new Adiacenza(top, Graphs.getOppositeVertex(this.grafo, e, top), this.grafo.getEdgeWeight(e)));
+		}
+		
+		Collections.sort(result);
+		return result;
+	}
+
+	public Player getTop() {
+		return this.top;
+	}
+
+	public Graph<Player, DefaultWeightedEdge> getGrafo() {
+		return grafo;
+	}
+	
 }

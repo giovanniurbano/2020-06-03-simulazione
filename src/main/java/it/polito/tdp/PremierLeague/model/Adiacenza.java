@@ -1,11 +1,11 @@
 package it.polito.tdp.PremierLeague.model;
 
-public class Adiacenza {
+public class Adiacenza implements Comparable<Adiacenza>{
 	private Player p1;
 	private Player p2;
-	private double peso;
+	private Double peso;
 	
-	public Adiacenza(Player p1, Player p2, double peso) {
+	public Adiacenza(Player p1, Player p2, Double peso) {
 		this.p1 = p1;
 		this.p2 = p2;
 		this.peso = peso;
@@ -31,8 +31,13 @@ public class Adiacenza {
 		return peso;
 	}
 
-	public void setPeso(double peso) {
+	public void setPeso(Double peso) {
 		this.peso = peso;
+	}
+
+	@Override
+	public int compareTo(Adiacenza o) {
+		return -this.peso.compareTo(o.peso);
 	}
 
 	
