@@ -44,7 +44,22 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	this.txtResult.clear();
+    	
+    	String goals = this.txtGoals.getText();
+    	try {
+    		Double minGoals = Double.parseDouble(goals);
+    		if(minGoals < 0) {
+    			this.txtResult.appendText("Inserire un numero maggiore di zero!");
+        		return;
+    		}
+    		String msg = this.model.creaGrafo(minGoals);
+    		this.txtResult.appendText(msg);
+    	}
+    	catch(NumberFormatException nfe) {
+    		this.txtResult.appendText("Inserire un numero!");
+    		return;
+    	}
     }
 
     @FXML

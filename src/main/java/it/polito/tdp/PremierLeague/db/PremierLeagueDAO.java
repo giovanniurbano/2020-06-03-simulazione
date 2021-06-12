@@ -12,6 +12,35 @@ import it.polito.tdp.PremierLeague.model.Player;
 
 public class PremierLeagueDAO {
 	
+	public List<Player> getPlayersByAvgGoals(Double minGoals){
+		String sql = "SELECT p.PlayerID, p.Name "
+				+ "FROM actions a, players p "
+				+ "WHERE a.PlayerID = p.PlayerID "
+				+ "GROUP BY p.PlayerID, p.Name "
+				+ "HAVING AVG(a.Goals) > ?";
+		List<Player> result = new ArrayList<Player>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setDouble(1, minGoals);
+			
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+
+				Player player = new Player(res.getInt("PlayerID"), res.getString("Name"));
+				
+				result.add(player);
+			}
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public List<Player> listAllPlayers(){
 		String sql = "SELECT * FROM Players";
 		List<Player> result = new ArrayList<Player>();
