@@ -1,5 +1,6 @@
 package it.polito.tdp.PremierLeague.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,10 +33,36 @@ public class Model {
 			this.idMap.put(p.getPlayerID(), p);
 		
 		//archi
-		
+		this.setArchi(minGoals);
 		
 		return String.format("Grafo creato con %d vertici e %d archi\n", this.grafo.vertexSet().size(), this.grafo.edgeSet().size());
 	}
 	
-	
+	private void setArchi(Double minGoals) {
+		List<Adiacenza> adiacenze = this.dao.getAdiacenze(minGoals, this.idMap);
+		List<Adiacenza> nuove = new ArrayList<Adiacenza>();
+		for(Adiacenza a1 : adiacenze) {
+			for(Adiacenza a2: adiacenze) {
+				if(a1.getP1().getPlayerID() > a2.getP1().getPlayerID() && a2.getP2().getPlayerID() > a2.getP2().getPlayerID())
+					if(a1.getP1().equals(a2.getP2()) && a1.getP2().equals(a2.getP1())) {
+						Adiacenza nuova = new Adiacenza(a1.getP1(), a1.getP2(), (a1.getPeso()-a2.getPeso()));
+						nuove.add(nuova);
+					}
+			}
+			nuove.add(a1);
+		}
+		
+		for(Adiacenza a : nuove) {
+			if(!this.grafo.containsEdge(a.getP1(), a.getP2()) && !this.grafo.containsEdge(a.getP2(), a.getP1())) {
+				if(a.getPeso() > 0) {
+					//da p1 a p2
+					Graphs.addEdgeWithVertices(this.grafo, a.getP1(), a.getP2(), a.getPeso());
+				}
+				else if(a.getPeso() < 0) {
+					//da p2 a p1
+					Graphs.addEdgeWithVertices(this.grafo, a.getP2(), a.getP1(), (a.getPeso()*-1));
+				}
+			}
+		}
+	}
 }
